@@ -1,0 +1,28 @@
+[
+    {
+        "_id": "67ba7e70fde51d594d5290d0",
+        "first_name": "Chris",
+        "last_name": "Barranger",
+        "date_of_birth": "1972-04-14",
+        "street_address": "2114 Hiltz Road",
+        "postal_code": "B0P1J0",
+        "state_or_province": "Nova Scotia",
+        "country": "Canada",
+        "email": "BarrTechSolutions@gmail.com",
+        "phone_number": "(289)244 4466",
+        "notes": "He is a cool dude"
+    },
+    {
+        "_id": "67ba7f3a56f3e60dedbd1bad",
+        "first_name": "Rebecca",
+        "last_name": "Barranger",
+        "date_of_birth": "1980-09-19",
+        "street_address": "2114 Hiltz Road",
+        "postal_code": "B0P1J0",
+        "state_or_province": "Nova Scotia",
+        "country": "Canada",
+        "email": "Rebecceharris@gmail.com",
+        "phone_number": "(289)338 9938",
+        "notes": "She is my wife"
+    }
+]
