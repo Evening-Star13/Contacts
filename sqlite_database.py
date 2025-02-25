@@ -10,7 +10,7 @@ class ContactManager:
     def __init__(self, master):
         self.master = master
         self.master.title("Contact Manager")
-        self.master.geometry("900x700")  # Set initial size of the window
+        self.master.geometry("1080x500")  # Set initial size of the window
 
         # Allow the window to be resizable
         self.master.resizable(True, True)  # Set both width and height to be resizable
@@ -21,6 +21,9 @@ class ContactManager:
 
         # Create UI elements
         self.create_widgets()
+
+        # Set default colors
+        self.set_widget_colors("#ffffff", "black")  # Change colors here
 
     def create_table(self):
         cursor = self.conn.cursor()
@@ -59,17 +62,33 @@ class ContactManager:
         ]
         self.entries = []
 
-        # Create entry fields in pairs
+        # Create entry fields
         for i, label in enumerate(labels):
-            tk.Label(self.master, text=label).grid(
-                row=i, column=0, padx=10, pady=5, sticky="e"
-            )
+            row = i // 3  # Determine the row number
+            column = i % 3  # Determine the column number
+
             if label == "Notes:":
-                entry = tk.Text(self.master, height=5, width=40)
-                entry.grid(row=i, column=1, padx=10, pady=5)
+                tk.Label(self.master, text=label).grid(
+                    row=row,
+                    column=column * 2,
+                    padx=(20, 0),
+                    pady=5,
+                    sticky="e",  # Changed padx to 20
+                )
+                entry = tk.Text(self.master, height=5, width=125)  # Adjusted width
+                entry.grid(
+                    row=row, column=column * 2 + 1, padx=(0, 10), pady=5, columnspan=6
+                )
             else:
-                entry = tk.Entry(self.master, width=40)
-                entry.grid(row=i, column=1, padx=10, pady=5)
+                tk.Label(self.master, text=label).grid(
+                    row=row,
+                    column=column * 2,
+                    padx=(20, 0),
+                    pady=5,
+                    sticky="e",  # Changed padx to 20
+                )
+                entry = tk.Entry(self.master, width=50)  # Adjusted width
+                entry.grid(row=row, column=column * 2 + 1, padx=(0, 10), pady=5)
             self.entries.append(entry)
 
         # Buttons
@@ -79,6 +98,7 @@ class ContactManager:
             ("Import Contacts from JSON", self.import_from_json),
             ("View All Contacts", self.view_contacts),
             ("Delete Contact", self.delete_contact),  # New delete button
+            ("Clear Fields", self.clear_fields),  # New clear button
         ]
 
         # Calculate the maximum button width based on text length
@@ -90,7 +110,13 @@ class ContactManager:
             button = tk.Button(
                 self.master, text=text, command=command, width=button_width
             )
-            button.grid(row=len(labels), column=i, padx=(10, 5), pady=10, sticky="ew")
+            button.grid(
+                row=len(labels) // 2 + 1,
+                column=i,
+                padx=(10, 5),
+                pady=10,
+                sticky="ew",
+            )
 
         # Configure grid weights for even spacing
         for i in range(len(button_labels)):
@@ -98,16 +124,27 @@ class ContactManager:
 
         # Text widget for displaying contacts
         self.contact_display = tk.Text(
-            self.master, height=15, width=80
+            self.master, height=15, width=150
         )  # Increased width
         self.contact_display.grid(
-            row=len(labels) + 1,
+            row=len(labels) // 3 + 2,
             column=0,
-            columnspan=4,
+            columnspan=6,
             padx=10,
             pady=10,
         )
         self.contact_display.config(state=tk.DISABLED)  # Make it read-only initially
+
+    def set_widget_colors(self, bg_color, fg_color):
+        """Set background and foreground colors for all widgets."""
+        self.master.config(bg=bg_color)
+        for entry in self.entries:
+            entry.config(bg=bg_color, fg=fg_color)
+        for widget in self.master.winfo_children():
+            if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
+                widget.config(bg=bg_color, fg=fg_color)
+        # Set colors for the contact display
+        self.contact_display.config(bg=bg_color, fg=fg_color)
 
     def add_new_entry(self):
         first_name = self.entries[0].get()
