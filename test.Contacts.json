@@ -1,0 +1,45 @@
+[{
+  "_id": {
+    "$oid": "67bddc0f1a9eae085d38804f"
+  },
+  "first_name": "Chris",
+  "last_name": "Barranger",
+  "date_of_birth": "1972-04-14",
+  "street_address": "2114 Hiltz Rd.",
+  "postal_code": "B0P1J0",
+  "state_or_province": "Nova Scotia",
+  "country": "Canada",
+  "email": "BarrTechSolutions@gmail.com",
+  "phone_number": "(289)244 4466",
+  "notes": "I am Founder & Owner of BarrTech Solutions. I am a software developer and I have been in the industry for over 20 years."
+},
+{
+  "_id": {
+    "$oid": "67bde6fccf41e0876a7082f1"
+  },
+  "first_name": "Rebecca",
+  "last_name": "Harris",
+  "date_of_birth": "1980-09-19",
+  "street_address": "2114 Hiltz Rd.",
+  "postal_code": "B0P1J0",
+  "state_or_province": "Nova Scotia",
+  "country": "Canada",
+  "email": "Rebecceharris@gmail.com",
+  "phone_number": "(289)338 9938",
+  "notes": "She is my beautiful wife and the love of my life"
+},
+{
+  "_id": {
+    "$oid": "67be07209dedee79f65538d9"
+  },
+  "first_name": "Jaide",
+  "last_name": "Barranger",
+  "date_of_birth": "2004-07-05",
+  "street_address": "",
+  "postal_code": "",
+  "state_or_province": "Ontario",
+  "country": "Canada",
+  "email": "Jbarranger@gmail.com",
+  "phone_number": "(226)208 7548",
+  "notes": "My amazing Daughter"
+}]
