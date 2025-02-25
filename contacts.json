@@ -1,28 +1,28 @@
 [
     {
-        "_id": "67ba7e70fde51d594d5290d0",
+        "_id": "67bddc0f1a9eae085d38804f",
         "first_name": "Chris",
         "last_name": "Barranger",
         "date_of_birth": "1972-04-14",
-        "street_address": "2114 Hiltz Road",
+        "street_address": "2114 Hiltz Rd.",
         "postal_code": "B0P1J0",
         "state_or_province": "Nova Scotia",
         "country": "Canada",
         "email": "BarrTechSolutions@gmail.com",
         "phone_number": "(289)244 4466",
-        "notes": "He is a cool dude"
+        "notes": "I am Founder & Owner of BarrTech Solutions. I am a software developer and I have been in the industry for over 20 years."
     },
     {
-        "_id": "67ba7f3a56f3e60dedbd1bad",
+        "_id": "67bde6fccf41e0876a7082f1",
         "first_name": "Rebecca",
-        "last_name": "Barranger",
+        "last_name": "Harris",
         "date_of_birth": "1980-09-19",
-        "street_address": "2114 Hiltz Road",
+        "street_address": "2114 Hiltz Rd.",
         "postal_code": "B0P1J0",
         "state_or_province": "Nova Scotia",
         "country": "Canada",
         "email": "Rebecceharris@gmail.com",
         "phone_number": "(289)338 9938",
-        "notes": "She is my wife"
+        "notes": "She is my beautiful wife and the love of my life"
     }
 ]

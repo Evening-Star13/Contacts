@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+import sqlite3
 import re
 import json
 import os
@@ -15,15 +15,33 @@ class ContactManager:
         # Allow the window to be resizable
         self.master.resizable(True, True)  # Set both width and height to be resizable
 
-        # Connect to the MongoDB server
-        self.client = MongoClient(
-            "mongodb+srv://Chris:13Guyver13@mongodbnetninja.pso3x.mongodb.net/?retryWrites=true&w=majority&appName=mongodbNetNinja"
-        )
-        self.db = self.client["test"]
-        self.collection = self.db["Contacts"]
+        # Connect to the SQLite database
+        self.conn = sqlite3.connect("contacts.db")
+        self.create_table()
 
         # Create UI elements
         self.create_widgets()
+
+    def create_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS Contacts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                first_name TEXT,
+                last_name TEXT,
+                date_of_birth TEXT,
+                street_address TEXT,
+                postal_code TEXT,
+                state_or_province TEXT,
+                country TEXT,
+                email TEXT UNIQUE,
+                phone_number TEXT,
+                notes TEXT
+            )
+        """
+        )
+        self.conn.commit()
 
     def create_widgets(self):
         # Input fields
@@ -111,24 +129,34 @@ class ContactManager:
             )
             return
 
-        new_document = {
-            "first_name": first_name,
-            "last_name": last_name,
-            "date_of_birth": dob,
-            "street_address": street_address,
-            "postal_code": postal_code,
-            "state_or_province": state_or_province,
-            "country": country,
-            "email": email,
-            "phone_number": phone_number,
-            "notes": notes,
-        }
+        new_contact = (
+            first_name,
+            last_name,
+            dob,
+            street_address,
+            postal_code,
+            state_or_province,
+            country,
+            email,
+            phone_number,
+            notes,
+        )
 
-        self.collection.insert_one(new_document)
-        messagebox.showinfo("Success", f"Added new document: {new_document}")
-
-        # Clear input fields after adding
-        self.clear_fields()
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO Contacts (first_name, last_name, date_of_birth, street_address, postal_code, 
+                state_or_province, country, email, phone_number, notes) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                new_contact,
+            )
+            self.conn.commit()
+            messagebox.showinfo("Success", f"Added new contact: {new_contact}")
+            self.clear_fields()
+        except sqlite3.IntegrityError:
+            messagebox.showerror("Error", "A contact with this email already exists.")
 
     def clear_fields(self):
         for entry in self.entries:
@@ -138,14 +166,29 @@ class ContactManager:
                 entry.delete(0, tk.END)
 
     def export_to_json(self):
-        contacts = list(self.collection.find())
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM Contacts")
+        contacts = cursor.fetchall()
+        contact_list = []
         for contact in contacts:
-            contact["_id"] = str(
-                contact["_id"]
-            )  # Convert ObjectId to string for JSON serialization
+            contact_dict = {
+                "id": contact[0],
+                "first_name": contact[1],
+                "last_name": contact[2],
+                "date_of_birth": contact[3],
+                "street_address": contact[4],
+                "postal_code": contact[5],
+                "state_or_province": contact[6],
+                "country": contact[7],
+                "email": contact[8],
+                "phone_number": contact[9],
+                "notes": contact[10],
+            }
+            contact_list.append(contact_dict)
+
         filename = "contacts.json"
         with open(filename, "w") as json_file:
-            json.dump(contacts, json_file, indent=4)
+            json.dump(contact_list, json_file, indent=4)
         messagebox.showinfo("Success", f"Exported contacts to {filename}")
 
     def import_from_json(self):
@@ -154,8 +197,31 @@ class ContactManager:
             with open(filename, "r") as json_file:
                 contacts = json.load(json_file)
                 for contact in contacts:
-                    contact["_id"] = None  # Remove _id to avoid duplicate key error
-                    self.collection.insert_one(contact)
+                    new_contact = (
+                        contact["first_name"],
+                        contact["last_name"],
+                        contact["date_of_birth"],
+                        contact["street_address"],
+                        contact["postal_code"],
+                        contact["state_or_province"],
+                        contact["country"],
+                        contact["email"],
+                        contact["phone_number"],
+                        contact["notes"],
+                    )
+                    try:
+                        cursor = self.conn.cursor()
+                        cursor.execute(
+                            """
+                            INSERT INTO Contacts (first_name, last_name, date_of_birth, street_address, postal_code, 
+                            state_or_province, country, email, phone_number, notes) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                            new_contact,
+                        )
+                    except sqlite3.IntegrityError:
+                        continue  # Skip duplicates
+                self.conn.commit()
             messagebox.showinfo("Success", f"Imported contacts from {filename}")
         else:
             messagebox.showerror("Error", f"{filename} does not exist.")
@@ -166,26 +232,30 @@ class ContactManager:
             messagebox.showerror("Error", "Please enter an email to delete a contact.")
             return
 
-        result = self.collection.delete_one({"email": email})
-        if result.deleted_count > 0:
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM Contacts WHERE email = ?", (email,))
+        if cursor.rowcount > 0:
+            self.conn.commit()
             messagebox.showinfo("Success", f"Deleted contact with email: {email}")
             self.clear_fields()  # Clear fields after deletion
         else:
             messagebox.showerror("Error", f"No contact found with email: {email}")
 
     def view_contacts(self):
-        contacts = list(self.collection.find())
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM Contacts")
+        contacts = cursor.fetchall()
         self.contact_display.config(state=tk.NORMAL)  # Enable editing
         self.contact_display.delete("1.0", tk.END)  # Clear previous content
         if contacts:
             contact_list = "\n".join(
                 [
-                    f"Name: {contact['first_name']} {contact['last_name']}\n"
-                    f"Email: {contact['email']}\n"
-                    f"Phone: {contact['phone_number']}\n"
-                    f"Address: {contact['street_address']}, {contact['postal_code']}, {contact['state_or_province']}, {contact['country']}\n"
-                    f"DOB: {contact['date_of_birth']}\n"
-                    f"Notes: {contact['notes']}\n"
+                    f"Name: {contact[1]} {contact[2]}\n"
+                    f"Email: {contact[8]}\n"
+                    f"Phone: {contact[9]}\n"
+                    f"Address: {contact[4]}, {contact[5]}, {contact[6]}, {contact[7]}\n"
+                    f"DOB: {contact[3]}\n"
+                    f"Notes: {contact[10]}\n"
                     for contact in contacts
                 ]
             )
@@ -195,7 +265,7 @@ class ContactManager:
         self.contact_display.config(state=tk.DISABLED)  # Make it read-only again
 
     def close(self):
-        self.client.close()
+        self.conn.close()
         self.master.quit()
 
 
